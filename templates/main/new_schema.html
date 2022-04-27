@@ -1,0 +1,142 @@
+{% extends 'main/base.html' %}
+
+<!-- create_with_author.html :: part 3 -->
+{% block content %}
+<form style="width: 90%;" method="POST" action="">
+    {% csrf_token %}
+<div style="margin-left:6rem; margin-top:3rem;">
+    <div class="row w-75">
+        <div class="col">
+            <h2>New schema</h2>
+        </div>
+        <div class="col">
+            <button type="submit" class="btn btn-primary btn-block mb-4">
+                Submit
+            </button>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <label class="form-label">{{schemaform.title.label}}</label>
+        {{ schemaform.title }}
+    </div>
+    <div class="col-md-4 mb-4">
+        <label class="form-label">{{schemaform.column_separator.label}}</label>
+        {{ schemaform.column_separator }}
+    </div>
+    <div class="col-md-4 mb-4">
+        <label class="form-label">{{schemaform.string_character.label}}</label>
+        {{ schemaform.string_character }}
+    </div>
+    <h2 class="mb-4">Schema Columns</h2>
+    {{ formset.management_form }}
+    {% for form in formset %}
+    {{ form.errors.range_from }}
+    <div class="row form-row spacer mb-2">
+        <div class="col-2">
+            <label class="form-label mb-1">{{form.name.label}}</label>
+            {{form.name}}
+        </div>
+        <div class="col-2" id="type">
+            <label class="form-label mb-1">{{form.column_type.label}}</label>
+            {{form.column_type}}
+        </div>
+        <div class="col-1" id="range_from" style="visibility; hidden">
+            <label class="form-label mb-1">{{form.range_from.label}}</label>
+            {{form.range_from}}
+        </div>
+        <div class="col-1" id="range_to" style="visibility; hidden">
+            <label class="form-label mb-1">{{form.range_to.label}}</label>
+            {{form.range_to}}
+        </div>
+        <div class="col-1">
+            <label class="form-label mb-1">{{form.column_number.label}}</label>
+            {{form.column_number}}
+        </div>
+        <div class="col-1 d-flex flex-column justify-content-end align-items-center">
+            <div class="input-group-append">
+                <button class="btn btn-success add-form-row">+</button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+</form>
+
+
+<script type='text/javascript'>
+
+    $(document).on('change', '.form-select', function(){
+        $("div").each(function(){
+            var option = $(this).find("#type option:selected").text();
+            if (option === 'Text' || option === 'Integer'){
+                $(this).find("#range_from").css('visibility', 'visible')
+                $(this).find("#range_to").css('visibility', 'visible')
+            }
+            else {
+                $(this).find("#range_from").css('visibility', 'hidden')
+                $(this).find("#range_to").css('visibility', 'hidden')
+            }
+        });
+    });
+
+    function updateElementIndex(el, prefix, ndx) {
+        var id_regex = new RegExp('(' + prefix + '-\\d+)');
+        var replacement = prefix + '-' + ndx;
+        if ($(el).attr("for")) $(el).attr("for", $(el).attr("for").replace(id_regex, replacement));
+        if (el.id) el.id = el.id.replace(id_regex, replacement);
+        if (el.name) el.name = el.name.replace(id_regex, replacement);
+    }
+    function cloneMore(selector, prefix) {
+        var newElement = $(selector).clone();
+        var total = $('#id_' + prefix + '-TOTAL_FORMS').val();
+        newElement.find(':input:not([type=button]):not([type=submit]):not([type=reset])').each(function() {
+            if ($(this).attr('name')){
+                var name = $(this).attr('name').replace('-' + (total-1) + '-', '-' + total + '-');
+                var id = 'id_' + name;
+                $(this).attr({'name': name, 'id': id}).val('').removeAttr('checked');
+        }
+        });
+        newElement.find('label').each(function() {
+            var forValue = $(this).attr('for');
+            if (forValue) {
+              forValue = forValue.replace('-' + (total-1) + '-', '-' + total + '-');
+              $(this).attr({'for': forValue});
+            }
+        });
+        total++;
+        $('#id_' + prefix + '-TOTAL_FORMS').val(total);
+        $(selector).after(newElement);
+        var conditionRow = $('.form-row:not(:last)');
+        conditionRow.find('.btn.add-form-row')
+        .removeClass('btn-success').addClass('btn-danger')
+        .removeClass('add-form-row').addClass('remove-form-row')
+        .html('<span class="glyphicon glyphicon-minus" aria-hidden="true">-</span>');
+        return false;
+    }
+    function deleteForm(prefix, btn) {
+        var total = parseInt($('#id_' + prefix + '-TOTAL_FORMS').val());
+        if (total > 1){
+            btn.closest('.form-row').remove();
+            var forms = $('.form-row');
+            $('#id_' + prefix + '-TOTAL_FORMS').val(forms.length);
+            for (var i=0, formCount=forms.length; i<formCount; i++) {
+                $(forms.get(i)).find(':input').each(function() {
+                    updateElementIndex(this, prefix, i);
+                });
+            }
+        }
+        return false;
+    }
+    $(document).on('click', '.add-form-row', function(e){
+        e.preventDefault();
+        cloneMore('.form-row:last', 'form');
+        return false;
+    });
+    $(document).on('click', '.remove-form-row', function(e){
+        e.preventDefault();
+        deleteForm('form', $(this));
+        return false;
+    });
+</script>
+
+{% endblock %}

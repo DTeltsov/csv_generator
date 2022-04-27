@@ -1,0 +1,43 @@
+{%extends 'main/base.html'%}
+
+
+{% block content %}
+<div class="d-flex flex-column min-vh-100 justify-content-center align-items-center">
+{% if form.errors %}
+  <p>Your username and password didn't match. Please try again.</p>
+{% endif %}
+
+{% if next %}
+  {% if user.is_authenticated %}
+    <p>Your account doesn't have access to this page. To proceed,
+    please login with an account that has access.</p>
+  {% else %}
+    <p>Please login to see this page.</p>
+  {% endif %}
+{% endif %}
+
+
+<form class="w-25 p-3  bg-light" align="center" method="post" action="{% url 'login' %}">
+{% csrf_token %}
+<div class="p-5">
+<div class="form-outline mb-4">
+  <h2 class="fw-bold">Login</h2>
+</div>
+
+<div class="form-outline mb-4">
+  <input type="text" name="username" id="form2Example1" class="form-control" placeholder="Username" required autofocus>
+</div>
+
+<div class="form-outline mb-4 ">
+  <input type="password" name="password" id="form2Example2" class="form-control" placeholder="Password" required autofocus>
+</div>
+
+
+<input type="submit" class="btn btn-primary btn-block mb-4" value="login" />
+<input type="hidden" name="next" value="{{ next }}" />
+<p><a href="{% url 'password_reset' %}">Lost password?</a></p>
+</form>
+</div>
+
+</div>
+{% endblock %}

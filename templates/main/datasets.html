@@ -1,0 +1,53 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+<div style="margin-left:6rem; margin-top:3rem;">
+  <div class="row w-75 mb-4">
+    <div class="col">
+      <h2>Data Sets</h2>
+    </div>
+    <div class="col d-flex flex-column justify-content-center align-items-end p-0">
+      <form method="POST" action="">
+        {% csrf_token %}
+        <div class="d-inline-block">
+          <label class="form-label">{{datasetform.rows_number.label}}</label>
+          {{ datasetform.rows_number }}
+        </div>
+        <div class="d-inline-block">
+          <button class="btn btn-success" type="submit">Generate data</button>
+        </div>
+      </form>
+    </div>
+  </div> 
+  <table class="table table-bordered w-75 p-3">
+    <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Created</th>
+      <th scope="col">Status</th>
+      <th scope="col">Actions</th>
+    </tr>
+    </thead>
+    <tbody style="border-top: thin;">
+      {% for dataset in datasets %}
+      <tr>
+        <td scope="row">{{ forloop.counter }}</td>
+        <td>{{ dataset.date_created|date:"Y-m-d" }}</td>
+        <td class=" flex-column justify-content-center">
+          {% if dataset.state == '1' %}
+            <p class="badge bg-secondary text-wrap mb-0 fs-6">Processing</p>
+          {% elif dataset.state == '2' %}
+            <p class="badge bg-success text-wrap mb-0 fs-6">Ready</p>
+          {% endif %}
+        </td>
+        <td>
+          {% if dataset.state == '2' %}
+            <a href="{% url 'download_dataset' pk=dataset.pk %}" class="text-decoration-none">Download</a> 
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
